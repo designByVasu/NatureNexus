@@ -24,6 +24,42 @@ import {
   X,
 } from "lucide-react";
 
+type EnquiryValues = {
+  name: string;
+  contactNumber: string;
+  service: string;
+};
+
+type EnquiryErrors = Partial<Record<keyof EnquiryValues, string>>;
+
+function validateEnquiry(values: EnquiryValues): EnquiryErrors {
+  const errors: EnquiryErrors = {};
+  const name = values.name.trim();
+  const contactNumber = values.contactNumber.trim();
+  const phoneDigits = contactNumber.replace(/\D/g, "");
+
+  if (!name) errors.name = "Please enter your name.";
+  else if (name.length < 2) errors.name = "Name must be at least 2 characters.";
+  else if (name.length > 80) errors.name = "Name must be 80 characters or fewer.";
+  else if (!new RegExp("^[\\p{L}\\p{M}][\\p{L}\\p{M}\\s.'’-]*$", "u").test(name)) {
+    errors.name = "Use letters, spaces, apostrophes, periods, or hyphens only.";
+  }
+
+  if (!contactNumber) errors.contactNumber = "Please enter a contact number.";
+  else if (!/^\+?[0-9\s().-]+$/.test(contactNumber)) {
+    errors.contactNumber = "Use digits and common phone separators only.";
+  } else if (phoneDigits.length < 7 || phoneDigits.length > 15) {
+    errors.contactNumber = "Enter a number with 7–15 digits.";
+  }
+
+  if (!values.service) errors.service = "Choose the service you need.";
+  else if (!["RO Plant", "STP", "ETP", "O&M Support"].includes(values.service)) {
+    errors.service = "Choose one of the listed services.";
+  }
+
+  return errors;
+}
+
 const services = [
   {
     number: "01",
@@ -95,6 +131,7 @@ export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const [activeService, setActiveService] = useState<string | null>(null);
   const [enquiryOpen, setEnquiryOpen] = useState(true);
+  const [fieldErrors, setFieldErrors] = useState<EnquiryErrors>({});
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -117,17 +154,40 @@ export default function Home() {
     };
   }, [enquiryOpen]);
 
+  const refreshFieldError = (field: keyof EnquiryValues, form: HTMLFormElement | null) => {
+    if (!form) return;
+    const formData = new FormData(form);
+    const errors = validateEnquiry({
+      name: String(formData.get("name") || ""),
+      contactNumber: String(formData.get("contactNumber") || ""),
+      service: String(formData.get("service") || ""),
+    });
+    setFieldErrors((current) => ({ ...current, [field]: errors[field] }));
+  };
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const name = String(formData.get("name") || "").trim();
-    const contactNumber = String(formData.get("contactNumber") || "").trim();
-    const service = String(formData.get("service") || "Not specified").trim();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const values: EnquiryValues = {
+      name: String(formData.get("name") || "").trim(),
+      contactNumber: String(formData.get("contactNumber") || "").trim(),
+      service: String(formData.get("service") || "").trim(),
+    };
+    const errors = validateEnquiry(values);
+    setFieldErrors(errors);
+
+    const firstInvalidField = (Object.keys(errors) as (keyof EnquiryValues)[])[0];
+    if (firstInvalidField) {
+      document.getElementById(`enquiry-${firstInvalidField}`)?.focus();
+      return;
+    }
+
     const message = [
       "Hello Nature Nexus, I would like to discuss a water treatment project.",
-      `Name: ${name}`,
-      `Contact number: ${contactNumber}`,
-      `Service required: ${service}`,
+      `Name: ${values.name}`,
+      `Contact number: ${values.contactNumber}`,
+      `Service required: ${values.service}`,
     ].join("\n");
 
     const whatsappUrl = `https://api.whatsapp.com/send?phone=918248772800&text=${encodeURIComponent(message)}`;
@@ -182,7 +242,31 @@ export default function Home() {
             <div className="relative my-auto w-full max-w-[520px] rounded-[26px] bg-[#173e38] p-6 text-white shadow-[0_24px_80px_rgba(5,34,29,0.45)] sm:p-8">
               <button type="button" aria-label="Close enquiry form" onClick={() => setEnquiryOpen(false)} className="absolute right-5 top-5 rounded-full border border-white/15 p-2 text-white/60 transition hover:border-white/40 hover:text-white"><X className="h-5 w-5" /></button>
               <div className="pr-10"><div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#b8e86e]">Start a conversation</div><h2 id="enquiry-modal-title" className="mt-3 font-display text-3xl font-semibold leading-tight tracking-[-0.05em] sm:text-4xl">Tell us about your project.</h2><p className="mt-3 text-sm leading-6 text-white/60">Share a few details and continue in WhatsApp with our team.</p></div>
-              <form onSubmit={handleSubmit} className="mt-7"><div className="space-y-3"><input required name="name" placeholder="Your name" autoFocus className="w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3.5 text-sm text-white outline-none placeholder:text-white/40 focus:border-[#b8e86e]" /><input required type="tel" name="contactNumber" placeholder="Contact number" inputMode="tel" autoComplete="tel" className="w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3.5 text-sm text-white outline-none placeholder:text-white/40 focus:border-[#b8e86e]" /><select required name="service" defaultValue="" className="w-full rounded-xl border border-white/15 bg-[#214a41] px-4 py-3.5 text-sm text-white/70 outline-none focus:border-[#b8e86e]"><option value="" disabled>What can we help with?</option><option value="ro">RO Plant</option><option value="stp">STP</option><option value="etp">ETP</option><option value="om">O&amp;M Support</option></select></div><button type="submit" className="mt-5 flex w-full items-center justify-between rounded-xl bg-[#d8f36b] px-4 py-4 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#173e38] transition hover:bg-[#e6ff92]"><span>Continue in WhatsApp</span><ArrowUpRight className="h-4 w-4" /></button><button type="button" onClick={() => setEnquiryOpen(false)} className="mt-3 w-full rounded-xl border border-white/15 px-4 py-3.5 text-[11px] font-extrabold uppercase tracking-[0.16em] text-white/65 transition hover:border-white/35 hover:text-white">Cancel</button><p className="mt-4 text-center text-[10px] text-white/40">Your enquiry will open in WhatsApp to +91 82487 72800</p></form>
+              <form noValidate onSubmit={handleSubmit} className="mt-7">
+                <div className="space-y-3">
+                  <div>
+                    <input id="enquiry-name" required name="name" type="text" minLength={2} maxLength={80} autoComplete="name" placeholder="Your name" autoFocus aria-invalid={Boolean(fieldErrors.name)} aria-describedby={fieldErrors.name ? "enquiry-name-error" : undefined} onChange={(event) => refreshFieldError("name", event.currentTarget.form)} className="w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3.5 text-sm text-white outline-none placeholder:text-white/40 focus:border-[#b8e86e]" />
+                    {fieldErrors.name && <p id="enquiry-name-error" role="alert" className="mt-1.5 text-xs text-[#ffd0c7]">{fieldErrors.name}</p>}
+                  </div>
+                  <div>
+                    <input id="enquiry-contactNumber" required type="tel" name="contactNumber" minLength={7} maxLength={22} inputMode="tel" autoComplete="tel" placeholder="Contact number" aria-invalid={Boolean(fieldErrors.contactNumber)} aria-describedby={fieldErrors.contactNumber ? "enquiry-contactNumber-error" : undefined} onChange={(event) => refreshFieldError("contactNumber", event.currentTarget.form)} className="w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3.5 text-sm text-white outline-none placeholder:text-white/40 focus:border-[#b8e86e]" />
+                    {fieldErrors.contactNumber && <p id="enquiry-contactNumber-error" role="alert" className="mt-1.5 text-xs text-[#ffd0c7]">{fieldErrors.contactNumber}</p>}
+                  </div>
+                  <div>
+                    <select id="enquiry-service" required name="service" defaultValue="" aria-invalid={Boolean(fieldErrors.service)} aria-describedby={fieldErrors.service ? "enquiry-service-error" : undefined} onChange={(event) => refreshFieldError("service", event.currentTarget.form)} className="w-full rounded-xl border border-white/15 bg-[#214a41] px-4 py-3.5 text-sm text-white/70 outline-none focus:border-[#b8e86e]">
+                      <option value="" disabled>What can we help with?</option>
+                      <option value="RO Plant">RO Plant</option>
+                      <option value="STP">STP</option>
+                      <option value="ETP">ETP</option>
+                      <option value="O&amp;M Support">O&amp;M Support</option>
+                    </select>
+                    {fieldErrors.service && <p id="enquiry-service-error" role="alert" className="mt-1.5 text-xs text-[#ffd0c7]">{fieldErrors.service}</p>}
+                  </div>
+                </div>
+                <button type="submit" className="mt-5 flex w-full items-center justify-between rounded-xl bg-[#d8f36b] px-4 py-4 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#173e38] transition hover:bg-[#e6ff92]"><span>Continue in WhatsApp</span><ArrowUpRight className="h-4 w-4" /></button>
+                <button type="button" onClick={() => setEnquiryOpen(false)} className="mt-3 w-full rounded-xl border border-white/15 px-4 py-3.5 text-[11px] font-extrabold uppercase tracking-[0.16em] text-white/65 transition hover:border-white/35 hover:text-white">Cancel</button>
+                <p className="mt-4 text-center text-[10px] text-white/40">Your enquiry will open in WhatsApp to +91 82487 72800</p>
+              </form>
             </div>
           </div>
         )}
