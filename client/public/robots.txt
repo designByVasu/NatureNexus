@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://nature-nexus-green.vercel.app/sitemap.xml

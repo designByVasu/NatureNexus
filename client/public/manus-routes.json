@@ -1,0 +1,77 @@
+{
+  "routes": [
+    {
+      "path": "/",
+      "title": "Nature Nexus Environmental Solutions | Water Treatment Tamil Nadu"
+    },
+    {
+      "path": "/services/",
+      "title": "Water & Wastewater Treatment Services | Nature Nexus"
+    },
+    {
+      "path": "/services/industrial-ro/",
+      "title": "Industrial RO Systems & Solutions | Nature Nexus"
+    },
+    {
+      "path": "/services/stp/",
+      "title": "Sewage Treatment Plant Solutions | Nature Nexus"
+    },
+    {
+      "path": "/services/etp/",
+      "title": "Industrial Effluent Treatment Plant Solutions | Nature Nexus"
+    },
+    {
+      "path": "/services/zld/",
+      "title": "Zero Liquid Discharge Systems | Nature Nexus"
+    },
+    {
+      "path": "/services/plant-installation-commissioning/",
+      "title": "Treatment Plant Installation & Commissioning | Nature Nexus"
+    },
+    {
+      "path": "/services/operation-maintenance/",
+      "title": "Water Treatment Plant Operation & Maintenance | Nature Nexus"
+    },
+    {
+      "path": "/services/annual-maintenance-contract/",
+      "title": "Treatment Plant AMC & Maintenance Support | Nature Nexus"
+    },
+    {
+      "path": "/industries/",
+      "title": "Industry Water & Wastewater Solutions | Nature Nexus"
+    },
+    {
+      "path": "/industries/textile/",
+      "title": "Textile Industry Effluent Treatment | Nature Nexus"
+    },
+    {
+      "path": "/industries/food-manufacturing/",
+      "title": "Food Manufacturing Wastewater Treatment | Nature Nexus"
+    },
+    {
+      "path": "/industries/hospitals/",
+      "title": "Hospital Water & Sewage Treatment Considerations | Nature Nexus"
+    },
+    {
+      "path": "/industries/manufacturing/",
+      "title": "Manufacturing Water & Effluent Treatment | Nature Nexus"
+    },
+    {
+      "path": "/industries/data-centres/",
+      "title": "Data Centre Water Treatment Considerations | Nature Nexus"
+    },
+    {
+      "path": "/industries/schools-apartments/",
+      "title": "School, Apartment & Building Water Treatment | Nature Nexus"
+    },
+    {
+      "path": "/about/",
+      "title": "About Nature Nexus Environmental Solutions"
+    },
+    {
+      "path": "/contact/",
+      "title": "Contact Nature Nexus | Water Treatment Enquiry"
+    },
+    { "path": "/privacy/", "title": "Privacy Information | Nature Nexus" }
+  ]
+}
