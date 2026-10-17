@@ -1,5 +1,13 @@
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { ArrowDownRight, ArrowUpRight, Droplets, Leaf } from "lucide-react";
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  Droplets,
+  Leaf,
+  Menu,
+  X,
+} from "lucide-react";
 import NotFound from "@/pages/NotFound";
 
 type PageInfo = {
@@ -418,6 +426,15 @@ const baseUrl = "https://nature-nexus-green.vercel.app";
 
 export default function ContentPage({ path }: { path: string }) {
   const page = pages[path];
+  const [mobileOpen, setMobileOpen] = useState(false);
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [mobileOpen]);
   if (!page) return <NotFound />;
   const links = page.links.map(link => ({
     path: link,
@@ -426,32 +443,97 @@ export default function ContentPage({ path }: { path: string }) {
 
   return (
     <main className="min-h-screen bg-[#f6f7f0] text-[#173e38]">
-      <header className="border-b border-[#dfe8d9] bg-[#f6f7f0]">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
+      <header className="relative z-30 border-b border-[#dfe8d9] bg-[#f6f7f0]">
+        <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-8">
           <Link
             href="/"
-            className="flex items-center gap-3"
+            className="flex min-w-0 items-center gap-2.5 sm:gap-3"
             aria-label="Nature Nexus home"
+            onClick={() => setMobileOpen(false)}
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#d8f36b]">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#d8f36b]">
               <Droplets className="h-5 w-5" />
             </span>
-            <span>
-              <strong className="block font-display text-lg">
+            <span className="min-w-0">
+              <strong className="block truncate font-display text-base sm:text-lg">
                 Nature Nexus
               </strong>
-              <small className="text-xs text-[#658078]">
+              <small className="block truncate text-[10px] text-[#658078] sm:text-xs">
                 Environmental Solutions
               </small>
             </span>
           </Link>
-          <nav className="flex gap-4 text-xs font-bold uppercase tracking-wider sm:gap-7">
+          <nav
+            aria-label="Primary navigation"
+            className="hidden items-center gap-4 text-[11px] font-bold uppercase tracking-wider text-[#355f57] md:flex xl:gap-7"
+          >
             <Link href="/services/">Services</Link>
             <Link href="/industries/">Industries</Link>
             <Link href="/about/">About</Link>
             <Link href="/contact/">Contact</Link>
           </nav>
+          <button
+            type="button"
+            aria-label={
+              mobileOpen ? "Close navigation menu" : "Open navigation menu"
+            }
+            aria-expanded={mobileOpen}
+            aria-controls="content-mobile-navigation"
+            onClick={() => setMobileOpen(open => !open)}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#173e38] transition hover:bg-[#e8efdf] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2d7a68] md:hidden"
+          >
+            {mobileOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
+          </button>
         </div>
+        <nav
+          id="content-mobile-navigation"
+          aria-label="Mobile navigation"
+          aria-hidden={!mobileOpen}
+          className={`${mobileOpen ? "block" : "hidden"} absolute left-0 right-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-[#dfe8d9] bg-[#f6f7f0] px-4 py-3 shadow-xl md:hidden`}
+        >
+          <div className="mx-auto flex max-w-6xl flex-col text-xs font-bold uppercase tracking-wider text-[#355f57]">
+            <Link
+              href="/services/"
+              onClick={() => setMobileOpen(false)}
+              className="flex min-h-11 items-center border-b border-[#dfe8d9]"
+            >
+              Services
+            </Link>
+            <Link
+              href="/industries/"
+              onClick={() => setMobileOpen(false)}
+              className="flex min-h-11 items-center border-b border-[#dfe8d9]"
+            >
+              Industries
+            </Link>
+            <Link
+              href="/about/"
+              onClick={() => setMobileOpen(false)}
+              className="flex min-h-11 items-center border-b border-[#dfe8d9]"
+            >
+              About
+            </Link>
+            <Link
+              href="/contact/"
+              onClick={() => setMobileOpen(false)}
+              className="flex min-h-11 items-center"
+            >
+              Contact
+            </Link>
+            <Link
+              href="/#contact"
+              onClick={() => setMobileOpen(false)}
+              className="mt-3 flex min-h-11 items-center justify-center rounded-full bg-[#173e38] px-5 py-3 text-center text-[#d8f36b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2d7a68]"
+            >
+              Request a site assessment{" "}
+              <ArrowUpRight className="ml-2 h-4 w-4 shrink-0" />
+            </Link>
+          </div>
+        </nav>
       </header>
       <section className="relative overflow-hidden bg-[#123d35] px-5 py-20 text-white sm:px-8 sm:py-28">
         <div className="pointer-events-none absolute -right-20 -top-20 h-96 w-96 rounded-full border border-[#b8e86e]/20" />

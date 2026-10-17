@@ -253,6 +253,15 @@ export default function Home() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [mobileOpen]);
+
   const refreshAllErrors = (form: HTMLFormElement | null) => {
     if (!form || !hasSubmitted) return;
     const formData = new FormData(form);
@@ -324,17 +333,17 @@ export default function Home() {
       <header
         className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${scrolled ? "border-b border-[#dfe8d9]/80 bg-[#f6f7f0]/95 shadow-[0_8px_30px_rgba(24,68,59,0.08)] backdrop-blur-xl" : "bg-transparent"}`}
       >
-        <div className="mx-auto flex h-[78px] max-w-[1280px] items-center justify-between px-5 sm:px-8 lg:px-12">
+        <div className="mx-auto flex h-16 w-full max-w-[1280px] items-center justify-between gap-3 px-4 sm:h-[72px] sm:px-6 xl:h-[78px] xl:px-12">
           <a
             href="#top"
-            className="group flex items-center gap-3"
+            className="group flex min-w-0 shrink-0 items-center gap-2.5 sm:gap-3"
             onClick={closeMenu}
           >
             <LogoMark />
             <div
               className={`leading-none transition-colors ${scrolled ? "text-[#173e38]" : "text-white"}`}
             >
-              <div className="font-display text-[18px] font-bold tracking-[-0.03em]">
+              <div className="font-display text-[16px] font-bold tracking-[-0.03em] sm:text-[18px]">
                 Nature Nexus
               </div>
               <div
@@ -346,7 +355,8 @@ export default function Home() {
           </a>
 
           <nav
-            className={`hidden items-center gap-8 text-[11px] font-bold uppercase tracking-[0.16em] lg:flex ${scrolled ? "text-[#355f57]" : "text-white/85"}`}
+            aria-label="Primary navigation"
+            className={`hidden items-center gap-4 text-[10px] font-bold uppercase tracking-[0.12em] xl:flex 2xl:gap-7 2xl:text-[11px] 2xl:tracking-[0.16em] ${scrolled ? "text-[#355f57]" : "text-white/85"}`}
           >
             <a className="nav-link" href="#about">
               About
@@ -364,13 +374,18 @@ export default function Home() {
 
           <a
             href="#contact"
-            className="hidden items-center gap-2 rounded-full bg-[#d8f36b] px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#173e38] transition hover:-translate-y-0.5 hover:bg-[#e6ff92] lg:flex"
+            className="hidden shrink-0 items-center gap-2 rounded-full bg-[#d8f36b] px-4 py-3 text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#173e38] transition hover:-translate-y-0.5 hover:bg-[#e6ff92] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#82d9ee] xl:flex 2xl:px-5 2xl:text-[11px]"
           >
             Start a conversation <ArrowUpRight className="h-4 w-4" />
           </a>
           <button
-            aria-label="Toggle menu"
-            className={`rounded-full p-2 lg:hidden ${scrolled ? "text-[#173e38]" : "text-white"}`}
+            type="button"
+            aria-label={
+              mobileOpen ? "Close navigation menu" : "Open navigation menu"
+            }
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-primary-navigation"
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#82d9ee] xl:hidden ${scrolled ? "text-[#173e38]" : "text-white"}`}
             onClick={() => setMobileOpen(value => !value)}
           >
             {mobileOpen ? (
@@ -380,36 +395,55 @@ export default function Home() {
             )}
           </button>
         </div>
-        {mobileOpen && (
-          <div className="border-t border-[#dfe8d9] bg-[#f6f7f0] px-5 py-5 shadow-xl lg:hidden">
-            <div className="flex flex-col gap-5 text-[12px] font-bold uppercase tracking-[0.16em] text-[#355f57]">
-              <a href="#about" onClick={closeMenu}>
-                About
-              </a>
-              <a href="#services" onClick={closeMenu}>
-                Expertise
-              </a>
-              <a href="#process" onClick={closeMenu}>
-                Process
-              </a>
-              <a href="#industries" onClick={closeMenu}>
-                Industries
-              </a>
-              <a
-                href="#contact"
-                onClick={closeMenu}
-                className="w-fit rounded-full bg-[#173e38] px-5 py-3 text-[#d8f36b]"
-              >
-                Start a conversation{" "}
-                <ArrowUpRight className="ml-1 inline h-4 w-4" />
-              </a>
-            </div>
+        <nav
+          id="mobile-primary-navigation"
+          aria-label="Mobile navigation"
+          aria-hidden={!mobileOpen}
+          className={`${mobileOpen ? "block" : "hidden"} absolute left-0 right-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-[#dfe8d9] bg-[#f6f7f0] px-4 py-4 shadow-xl sm:px-6 xl:hidden`}
+        >
+          <div className="mx-auto flex max-w-[1280px] flex-col text-[12px] font-bold uppercase tracking-[0.14em] text-[#355f57]">
+            <a
+              className="flex min-h-11 items-center border-b border-[#dfe8d9]"
+              href="#about"
+              onClick={closeMenu}
+            >
+              About
+            </a>
+            <a
+              className="flex min-h-11 items-center border-b border-[#dfe8d9]"
+              href="/services/"
+              onClick={closeMenu}
+            >
+              Services
+            </a>
+            <a
+              className="flex min-h-11 items-center border-b border-[#dfe8d9]"
+              href="#process"
+              onClick={closeMenu}
+            >
+              Process
+            </a>
+            <a
+              className="flex min-h-11 items-center border-b border-[#dfe8d9]"
+              href="/industries/"
+              onClick={closeMenu}
+            >
+              Industries
+            </a>
+            <a
+              className="mt-4 flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#173e38] px-5 py-3 text-center text-[#d8f36b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#82d9ee]"
+              href="#contact"
+              onClick={closeMenu}
+            >
+              Request a site assessment{" "}
+              <ArrowUpRight className="h-4 w-4 shrink-0" />
+            </a>
           </div>
-        )}
+        </nav>
       </header>
 
       <main id="top">
-        <section className="relative min-h-[720px] overflow-hidden bg-[#123d35] pt-[78px] lg:min-h-[820px]">
+        <section className="relative min-h-[720px] overflow-hidden bg-[#123d35] pt-16 sm:pt-[72px] lg:min-h-[820px] xl:pt-[78px]">
           <div className="absolute inset-0">
             <div className="absolute inset-0 bg-[linear-gradient(90deg,#123d35_0%,rgba(18,61,53,0.94)_24%,rgba(18,61,53,0.5)_58%,rgba(18,61,53,0.35)_100%)]" />
             <div className="absolute inset-0 opacity-30 [background-image:radial-gradient(rgba(255,255,255,0.28)_0.7px,transparent_0.7px)] [background-size:14px_14px]" />
